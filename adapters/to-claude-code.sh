@@ -1,18 +1,14 @@
 #!/bin/bash
-# Sync skills to Claude Code's global skills directory
+# ~/.claude/skills is a symlink to skills-library/claude-code/
+# No copy needed — just verify the symlink exists, create it if missing.
 
-SKILLS_DIR="$(dirname "$0")/.."
-TARGET_DIR="$HOME/.claude/skills"
+TARGET="$HOME/.claude/skills"
+SOURCE="$(cd "$(dirname "$0")/../claude-code" && pwd)"
 
-mkdir -p "$TARGET_DIR"
-
-echo "Syncing skills to $TARGET_DIR ..."
-
-for file in "$SKILLS_DIR/claude-code"/*.md "$SKILLS_DIR/universal"/*.md; do
-  [ -f "$file" ] || continue
-  name=$(basename "$file")
-  cp "$file" "$TARGET_DIR/$name"
-  echo "  ✓ $name"
-done
-
-echo "Done."
+if [ -L "$TARGET" ] && [ "$(readlink "$TARGET")" = "$SOURCE" ]; then
+  echo "✓ ~/.claude/skills already linked to $SOURCE"
+else
+  rm -rf "$TARGET"
+  ln -s "$SOURCE" "$TARGET"
+  echo "✓ Linked ~/.claude/skills -> $SOURCE"
+fi
